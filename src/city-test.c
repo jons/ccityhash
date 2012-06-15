@@ -1,3 +1,8 @@
+/**
+ * CCityHash
+ * port of google cityhash to C
+ * @author jon <jon@wroth.org>
+ */
 // Copyright (c) 2011 Google, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,34 +23,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <cstdio>
-#include <iostream>
+#include <stdio.h>
 #include <string.h>
 #include "city.h"
 #ifdef __SSE4_2__
 #include "citycrc.h"
 #endif
 
-using std::cout;
-using std::cerr;
-using std::hex;
-
 static const uint64 k0 = 0xc3a5c85c97cb3127ULL;
 static const uint64 kSeed0 = 1234567;
-static const uint64 kSeed1 = k0;
-static const uint128 kSeed128(kSeed0, kSeed1);
+static const uint64 kSeed1 = 0xc3a5c85c97cb3127ULL; // k0
 static const int kDataSize = 1 << 20;
 static const int kTestSize = 300;
 
-static char data[kDataSize];
+// globals
 
-static int errors = 0;  // global error count
+int errors;
+char data[1 << 20]; // kDataSize
+uint128 kSeed128;
+
+
 
 // Initialize data to pseudorandom values.
-void setup() {
+void setup()
+{
+  int i;
   uint64 a = 9;
   uint64 b = 777;
-  for (int i = 0; i < kDataSize; i++) {
+
+  kSeed128.first = kSeed0;
+  kSeed128.second = kSeed1;
+  errors = 0;
+
+  for (i = 0; i < kDataSize; i++) {
     a = (a ^ (a >> 41)) * k0 + b;
     b = (b ^ (b >> 41)) * k0 + i;
     uint8 u = b >> 37;
@@ -56,7 +66,9 @@ void setup() {
 #if 1
 
 #define C(x) 0x ## x ## ULL
-static const uint64 testdata[kTestSize][15] = {
+
+// [kTestSize][15]
+static const uint64 testdata[300][15] = {
 {C(9ae16a3b2f90404f), C(75106db890237a4a), C(3feac5f636039766), C(3df09dfc64c09a2b), C(3cb540c392e51e29), C(6b56343feac0663), C(5b7bc50fd8e8ad92),
 C(3df09dfc64c09a2b), C(3cb540c392e51e29), C(6b56343feac0663), C(5b7bc50fd8e8ad92),
 C(889f555a0f5b2dc0), C(7767800902c8a8ce), C(bcd2a808f4cb4a44), C(e9024dba8f94f2f3)},
@@ -959,32 +971,35 @@ C(33fc6ffd1ffb8676), C(36db7617b765f6e2), C(8df41c03c514a9dc), C(6707cc39a809bb7
 C(3f27d7bb79e31984), C(a39dc6ac6cb0b0a8), C(33fc6ffd1ffb8676), C(36db7617b765f6e2)},
 };
 
-void Check(uint64 expected, uint64 actual) {
+void Check(uint64 expected, uint64 actual)
+{
   if (expected != actual) {
-    cerr << "ERROR: expected 0x" << hex << expected << ", but got 0x" << actual << "\n";
-    ++errors;
+    //cerr << "ERROR: expected 0x" << hex << expected << ", but got 0x" << actual << "\n";
+    printf("ERROR: expected %#016llx, but got %#016llx\n", expected, actual);
+    errors++;
   }
 }
 
-void Test(const uint64* expected, int offset, int len) {
+void Test(const uint64* expected, int offset, int len)
+{
   const uint128 u = CityHash128(data + offset, len);
   const uint128 v = CityHash128WithSeed(data + offset, len, kSeed128);
   Check(expected[0], CityHash64(data + offset, len));
   Check(expected[1], CityHash64WithSeed(data + offset, len, kSeed0));
   Check(expected[2], CityHash64WithSeeds(data + offset, len, kSeed0, kSeed1));
-  Check(expected[3], Uint128Low64(u));
-  Check(expected[4], Uint128High64(u));
-  Check(expected[5], Uint128Low64(v));
-  Check(expected[6], Uint128High64(v));
+  Check(expected[3], Uint128Low64(&u));
+  Check(expected[4], Uint128High64(&u));
+  Check(expected[5], Uint128Low64(&v));
+  Check(expected[6], Uint128High64(&v));
 #ifdef __SSE4_2__
   const uint128 y = CityHashCrc128(data + offset, len);
   const uint128 z = CityHashCrc128WithSeed(data + offset, len, kSeed128);
   uint64 crc256_results[4];
   CityHashCrc256(data + offset, len, crc256_results);
-  Check(expected[7], Uint128Low64(y));
-  Check(expected[8], Uint128High64(y));
-  Check(expected[9], Uint128Low64(z));
-  Check(expected[10], Uint128High64(z));
+  Check(expected[7], Uint128Low64(&y));
+  Check(expected[8], Uint128High64(&y));
+  Check(expected[9], Uint128Low64(&z));
+  Check(expected[10], Uint128High64(&z));
   for (int i = 0; i < 4; i++) {
     Check(expected[11 + i], crc256_results[i]);
   }
@@ -994,13 +1009,15 @@ void Test(const uint64* expected, int offset, int len) {
 #else
 
 #define Test(a, b, c) Dump((b), (c))
-void Dump(int offset, int len) {
+void Dump(int offset, int len)
+{
   const uint128 u = CityHash128(data + offset, len);
   const uint128 v = CityHash128WithSeed(data + offset, len, kSeed128);
   const uint128 y = CityHashCrc128(data + offset, len);
   const uint128 z = CityHashCrc128WithSeed(data + offset, len, kSeed128);
   uint64 crc256_results[4];
   CityHashCrc256(data + offset, len, crc256_results);
+  /* son of a bitch
   cout << hex
        << "{C(" << CityHash64(data + offset, len) << "), "
        << "C(" << CityHash64WithSeed(data + offset, len, kSeed0) << "), "
@@ -1013,17 +1030,39 @@ void Dump(int offset, int len) {
        << "C(" << Uint128High64(y) << "), "
        << "C(" << Uint128Low64(z) << "), "
        << "C(" << Uint128High64(z) << "),\n";
+  */
+  printf("{C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx),\n"
+         "C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx),\n",
+         CityHash64(data + offset, len),
+         CityHash64WithSeed(data + offset, len, kSeed0),
+         CityHash64WithSeeds(data + offset, len, kSeed0, kSeed1),
+         Uint128Low64(u),
+         Uint128High64(u),
+         Uint128Low64(v),
+         Uint128High64(v),
+         Uint128Low64(y),
+         Uint128High64(y),
+         Uint128Low64(z),
+         Uint128High64(z));
+
   for (int i = 0; i < 4; i++) {
-    cout << hex << "C(" << crc256_results[i] << (i == 3 ? ")},\n" : "), ");
+    //cout << hex << "C(" << crc256_results[i] << (i == 3 ? ")},\n" : "), ");
+    printf(
+      "C(%#016llx)%s",
+      crc256_results[i],
+      (i == 3 ? "},\n" : ", ");
   }
 }
 
 #endif
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
+  int i;
+
   setup();
-  int i = 0;
-  for ( ; i < kTestSize - 1; i++) {
+
+  for (i = 0; i < kTestSize - 1; i++) {
     Test(testdata[i], i * i, i);
   }
   Test(testdata[i], 0, kDataSize);
