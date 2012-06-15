@@ -5,14 +5,14 @@ m4_define([cityhash_patchlevel], [3])
 # Libtool shared library interface versions (current:revision:age)
 # Update this value for every release!  (A:B:C will map to foo.so.(A-C).C.B)
 # http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
-m4_define([cityhash_ltversion], [2:0:0])
+m4_define([cityhash_ltversion], [0:0:0])
 
-AC_PREREQ([2.65])
-AC_INIT([CityHash], [cityhash_major.cityhash_minor.cityhash_patchlevel], [cityhash-discuss@googlegroups.com])
+AC_PREREQ([2.61])
+AC_INIT([CCityHash], [cityhash_major.cityhash_minor.cityhash_patchlevel], [cityhash-discuss@googlegroups.com])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
-LT_PREREQ([2.2])
-LT_INIT
+#LT_PREREQ([2.2])
+#LT_INIT
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
@@ -26,8 +26,9 @@ AC_ARG_ENABLE([sse4.2],
 AM_CONDITIONAL([SSE42], [test x$cityhash_sse42 = xtrue ])
 
 # Checks for programs.
-AC_PROG_CXX
-AC_LANG([C++])
+AC_PROG_RANLIB
+AC_PROG_CC
+AC_LANG([C])
 AC_C_BIGENDIAN
 
 # Checks for libraries.
@@ -66,7 +67,7 @@ echo \
 ${PACKAGE_NAME} Version ${PACKAGE_VERSION}
 
 Prefix: '${prefix}'.
-Compiler: '${CXX} ${CXXFLAGS}'
+Compiler: '${CC} ${CFLAGS}'
 
 Now type 'make @<:@<target>@:>@'
   where the optional <target> is:
