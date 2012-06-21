@@ -1,22 +1,23 @@
-m4_define([cityhash_major], [1])
-m4_define([cityhash_minor], [0])
-m4_define([cityhash_patchlevel], [3])
-
-# Libtool shared library interface versions (current:revision:age)
-# Update this value for every release!  (A:B:C will map to foo.so.(A-C).C.B)
-# http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
-m4_define([cityhash_ltversion], [0:0:0])
+m4_define([ccityhash_major], [1])
+m4_define([ccityhash_minor], [0])
+m4_define([ccityhash_patchlevel], [4])
 
 AC_PREREQ([2.61])
-AC_INIT([CCityHash], [cityhash_major.cityhash_minor.cityhash_patchlevel], [cityhash-discuss@googlegroups.com])
+AC_INIT([CCityHash], [ccityhash_major.ccityhash_minor.ccityhash_patchlevel], [cityhash-discuss@googlegroups.com])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([1.10 no-define foreign])
 #LT_PREREQ([2.2])
 #LT_INIT
 
+# Libtool shared library interface version (current:revision:age)
+# Update this value for every release according to the libtool instructions!  (A:B:C will map to foo.so.(A-C).C.B)
+# http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
+CCITYHASH_LTVER="1:0:0"
+AC_SUBST([CCITYHASH_LTVER])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
-AC_CONFIG_SRCDIR([src/city.h])
+AC_CONFIG_SRCDIR([src/city.c])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_ARG_ENABLE([sse4.2],
