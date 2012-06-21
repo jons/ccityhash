@@ -10,7 +10,7 @@ AM_INIT_AUTOMAKE([1.10 no-define foreign])
 #LT_INIT
 
 # Libtool shared library interface version (current:revision:age)
-# Update this value for every release according to the libtool instructions!  (A:B:C will map to foo.so.(A-C).C.B)
+# Update this value for every release according to the libtool instructions!
 # http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
 CCITYHASH_LTVER="1:0:0"
 AC_SUBST([CCITYHASH_LTVER])
