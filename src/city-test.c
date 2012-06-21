@@ -63,7 +63,7 @@ void setup()
   }
 }
 
-#if 1
+#if 0
 
 #define C(x) 0x ## x ## ULL
 
@@ -1013,37 +1013,29 @@ void Dump(int offset, int len)
 {
   const uint128 u = CityHash128(data + offset, len);
   const uint128 v = CityHash128WithSeed(data + offset, len, kSeed128);
+
+#ifdef __SSE4_2__
   const uint128 y = CityHashCrc128(data + offset, len);
   const uint128 z = CityHashCrc128WithSeed(data + offset, len, kSeed128);
   uint64 crc256_results[4];
   CityHashCrc256(data + offset, len, crc256_results);
-  /* son of a bitch
-  cout << hex
-       << "{C(" << CityHash64(data + offset, len) << "), "
-       << "C(" << CityHash64WithSeed(data + offset, len, kSeed0) << "), "
-       << "C(" << CityHash64WithSeeds(data + offset, len, kSeed0, kSeed1) << "), "
-       << "C(" << Uint128Low64(u) << "), "
-       << "C(" << Uint128High64(u) << "), "
-       << "C(" << Uint128Low64(v) << "), "
-       << "C(" << Uint128High64(v) << "),\n"
-       << "C(" << Uint128Low64(y) << "), "
-       << "C(" << Uint128High64(y) << "), "
-       << "C(" << Uint128Low64(z) << "), "
-       << "C(" << Uint128High64(z) << "),\n";
-  */
-  printf("{C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx),\n"
-         "C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx),\n",
+#endif
+
+  printf("{C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx)\n",
          CityHash64(data + offset, len),
          CityHash64WithSeed(data + offset, len, kSeed0),
          CityHash64WithSeeds(data + offset, len, kSeed0, kSeed1),
-         Uint128Low64(u),
-         Uint128High64(u),
-         Uint128Low64(v),
-         Uint128High64(v),
-         Uint128Low64(y),
-         Uint128High64(y),
-         Uint128Low64(z),
-         Uint128High64(z));
+         Uint128Low64(&u),
+         Uint128High64(&u),
+         Uint128Low64(&v),
+         Uint128High64(&v));
+
+#ifdef __SSE4_2__
+  printf("C(%#016llx), C(%#016llx), C(%#016llx), C(%#016llx)\n",
+         Uint128Low64(&y),
+         Uint128High64(&y),
+         Uint128Low64(&z),
+         Uint128High64(&z));
 
   for (int i = 0; i < 4; i++) {
     //cout << hex << "C(" << crc256_results[i] << (i == 3 ? ")},\n" : "), ");
@@ -1052,6 +1044,7 @@ void Dump(int offset, int len)
       crc256_results[i],
       (i == 3 ? "},\n" : ", ");
   }
+#endif
 }
 
 #endif
