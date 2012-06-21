@@ -51,6 +51,12 @@
 #include <stdlib.h>  // for size_t.
 #include <stdint.h>
 
+#define PRIME_K0  (0xc3a5c85c97cb3127ULL)
+#define PRIME_K1  (0xb492b66fbe98f273ULL)
+#define PRIME_K2  (0x9ae16a3b2f90404fULL)
+#define PRIME_K3  (0xc949d7c7509e6557ULL)
+
+
 typedef uint8_t uint8;
 typedef uint32_t uint32;
 typedef uint64_t uint64;

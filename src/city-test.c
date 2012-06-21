@@ -30,9 +30,8 @@
 #include "citycrc.h"
 #endif
 
-static const uint64 k0 = 0xc3a5c85c97cb3127ULL;
 static const uint64 kSeed0 = 1234567;
-static const uint64 kSeed1 = 0xc3a5c85c97cb3127ULL; // k0
+static const uint64 kSeed1 = PRIME_K0;
 static const int kDataSize = 1 << 20;
 static const int kTestSize = 300;
 
@@ -56,8 +55,8 @@ void setup()
   errors = 0;
 
   for (i = 0; i < kDataSize; i++) {
-    a = (a ^ (a >> 41)) * k0 + b;
-    b = (b ^ (b >> 41)) * k0 + i;
+    a = (a ^ (a >> 41)) * PRIME_K0 + b;
+    b = (b ^ (b >> 41)) * PRIME_K0 + i;
     uint8 u = b >> 37;
     memcpy(data + i, &u, 1);  // uint8 -> char
   }
