@@ -26,23 +26,27 @@ AC_ARG_ENABLE([sse4.2],
 AM_CONDITIONAL([SSE42], [test x$cityhash_sse42 = xtrue ])
 
 # Checks for programs.
-AC_PROG_RANLIB
 AC_PROG_CC
 AC_LANG([C])
-AC_C_BIGENDIAN
+AC_PROG_RANLIB
+AC_PROG_LIBTOOL
 
 # Checks for libraries.
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdint.h stdlib.h])
+AC_CHECK_HEADERS([stdint.h stdio.h stdlib.h string.h nmmintrin.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
+AC_C_BIGENDIAN
+AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
+
+AC_CHECK_FUNCS([memset])
 
 # Check for __builtin_expect
 AC_MSG_CHECKING([if the compiler supports __builtin_expect])
