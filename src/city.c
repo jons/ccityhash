@@ -33,8 +33,9 @@
 // compromising on hash quality.
 
 #include "config.h"
+
 #include <string.h>  // for memcpy and memset
-#include <city.h>
+#include "city.h"
 
 
 static uint64 UNALIGNED_LOAD64(const char *p) {
@@ -420,8 +421,11 @@ uint128 CityHash128(const char *s, size_t len)
 }
 
 #ifdef __SSE4_2__
-#include <citycrc.h>
+#ifndef HAVE_NMMINTRIN_H
+#error nmmintrin.h missing; SSE4.2 not supported
+#endif
 #include <nmmintrin.h> // not sure about this guy
+#include "citycrc.h"
 
 // Requires len >= 240.
 static void CityHashCrc256Long(const char *s, size_t len,
